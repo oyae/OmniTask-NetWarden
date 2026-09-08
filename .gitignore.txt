@@ -1,0 +1,26 @@
+# Python bytecode y caché
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Entornos virtuales
+venv/
+env/
+ENV/
+
+# Sistema macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Registros e historiales
+*.log
+/var/log/net_warden.log
+/tmp/omnitask*.log
+
+# IDEs y Editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
