@@ -2,6 +2,8 @@
 
 Repository that hosts two independent tools aimed at performance and advanced security in macOS: **OmniTask** and **NetWarden**.
 
+Any dev that wants to help in developing ports to windows/linux is welcomed!
+
 ---
 
 ## 📂 Repository Content
