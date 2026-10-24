@@ -19,18 +19,18 @@ Any dev that wants to help in developing ports to windows/linux is welcomed!
 Resource monitoring application for the user.
 
 ```bash
-OmniTask cd
-brew install python@3.14 <!-- In case of not having a recent version of python installed -->
+cd OmniTask
+# In case of not having a recent version of Python installed:
+brew install python@3.14 
+
 chmod +x install.sh
-sudo ./install.sh
-python3 main.py
+./install.sh
 ```
 
-*Optional (Auto-start with system as LaunchAgent):*
+*In case you need to stop and uninstall the program*
 ```bash
-mkdir -p ~/Library/LaunchAgents
-cp config/com.vrtx.omnitask.plist ~/Library/LaunchAgents/
-launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.vrtx.omnitask.plist
+launchctl bootout gui/$(id -u)/com.vrtx.omnitask
+rm ~/Library/LaunchAgents/com.vrtx.omnitask.plist
 ```
 
 ### 2. NetWarden
@@ -61,4 +61,9 @@ sudo launchctl bootstrap system /Library/LaunchDaemons/com.security.netwarden.pl
 To check NetWarden's achievement in real time:
 ```
 sudo tail -f /var/log/net_warden.log
+```
+*In case you need to stop and uninstall the program*
+```bash
+sudo launchctl bootout system /Library/LaunchDaemons/com.security.netwarden.plist
+sudo rm /Library/LaunchDaemons/com.security.netwarden.plist
 ```

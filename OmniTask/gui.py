@@ -15,7 +15,6 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import QTimer, Qt, QPointF, QRectF
 from PyQt6.QtGui import QPainter, QColor, QFont, QPen, QConicalGradient, QPixmap, QPainterPath, QPolygonF, QIcon
-from main import HiloMonitor
 
 import setproctitle
 
@@ -400,19 +399,17 @@ class LaunchpadListWidget(QWidget):
 			self.callback_agregar(dlg.nombre_seleccionado)
 
 class VentanaPrincipal(QMainWindow):
-	def __init__(self):
+	def __init__(self, hilo_monitor):
 		super().__init__()
 		self.ram_total_gb = max(1, round(psutil.virtual_memory().total / (1024 ** 3)))
-		self.alerta_notificada = False
-		self._inicializar_system_tray()
+		
 		self.init_ui()
-		self.hilo = HiloMonitor()
+		self.hilo = hilo_monitor
 		self.hilo.datos_actualizados.connect(self.actualizar_interfaz)
 		self.hilo.alerta_seguridad.connect(self._mostrar_aviso_seguridad)
 		self.hilo.consola_log.connect(self._append_console_log)
 		self.hilo.solicitar_accesibilidad.connect(self._mostrar_aviso_accesibilidad)
-		self.hilo.verificar_accesibilidad()
-		self.hilo.start()
+		
 		self._actualizar_umbrales_cpu()
 		self._actualizar_umbrales_ram()
 		self._actualizar_vram_slider(self.slider_vram.value())
@@ -420,29 +417,6 @@ class VentanaPrincipal(QMainWindow):
 		self.timer_watchdog.setInterval(2000)
 		self.timer_watchdog.timeout.connect(self._verificar_salud_sistema)
 		self.timer_watchdog.start()
-
-	def _inicializar_system_tray(self):
-		self.tray_icon = QSystemTrayIcon(self)
-		script_dir = os.path.dirname(os.path.abspath(__file__))
-		img_path = os.path.join(script_dir, "speedometer.png")
-		alert_path = os.path.join(script_dir, "Stress.png")
-		if os.path.exists(img_path): self.icon_normal = QIcon(img_path)
-		else: self.icon_normal = self.style().standardIcon(QStyle.StandardPixmap.SP_ComputerIcon)
-		if os.path.exists(alert_path): self.icon_alerta = QIcon(alert_path)
-		else: self.icon_alerta = self.style().standardIcon(QStyle.StandardPixmap.SP_MessageBoxWarning)
-		self.tray_icon.setIcon(self.icon_normal)
-		self.tray_icon.activated.connect(self._tray_icon_activated)
-		self.tray_icon.show()
-
-	def _tray_icon_activated(self, reason):
-		if reason in (QSystemTrayIcon.ActivationReason.Trigger, QSystemTrayIcon.ActivationReason.DoubleClick):
-			self.show()
-			self.raise_()
-			self.activateWindow()
-
-	def _disparar_notificacion_estres(self, mensaje):
-		if QSystemTrayIcon.isSystemTrayAvailable():
-			self.tray_icon.showMessage("OmniTask", "The system has entered into stress mode", QSystemTrayIcon.MessageIcon.Warning, 4000)
 
 	def _verificar_salud_sistema(self):
 		if self.hilo.en_modo_estres and len(self.hilo.procesos_congelados) > 0:
@@ -713,13 +687,9 @@ class VentanaPrincipal(QMainWindow):
 		if alerta:
 			self.lbl_status.setText(f"⚠️ {alerta}")
 			self.lbl_status.setStyleSheet("font-size: 11px; font-weight: bold; color: #ff0055;")
-			self.tray_icon.setIcon(self.icon_alerta)
-			if not self.alerta_notificada: self._disparar_notificacion_estres(alerta); self.alerta_notificada = True
 		else:
 			self.lbl_status.setText("SYSTEM STATUS: STABLE")
 			self.lbl_status.setStyleSheet("font-size: 11px; font-weight: 500; color: #00e5ff;")
-			self.tray_icon.setIcon(self.icon_normal)
-			self.alerta_notificada = False
 
 		if self.tabs.currentIndex() != 1 or self.tabla_slices.verticalScrollBar().isSliderDown(): return
 
@@ -744,11 +714,5 @@ class VentanaPrincipal(QMainWindow):
 		finally: self.tabla_slices.setUpdatesEnabled(True)
 
 	def closeEvent(self, event):
-		self.hilo.stop()
-		event.accept()
-
-if __name__ == "__main__":
-	app = QApplication(sys.argv)
-	ventana = VentanaPrincipal()
-	ventana.show()
-	sys.exit(app.exec())
+		self.hide()
+		event.ignore()
