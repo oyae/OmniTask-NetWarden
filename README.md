@@ -20,7 +20,9 @@ Resource monitoring application for the user.
 
 ```bash
 OmniTask cd
-pip3 install -r requirements.txt
+brew install python@3.14 <!-- In case of not having a recent version of python installed -->
+chmod +x install.sh
+sudo ./install.sh
 python3 main.py
 ```
 

@@ -1,2 +1,6 @@
 psutil>=5.9.0
 PyQt6>=6.4.0
+setproctitle
+pyobjc-core
+pyobjc-framework-ApplicationServices
+pyobjc-framework-AppKit
